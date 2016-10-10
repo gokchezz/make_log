@@ -20,7 +20,7 @@ def save_results(root_path, device, case_count, start_time, fails_count, report_
     json_hash = JSON.parse(json)
     same_test = false
     json_hash.each do |j|
-      if (j['date'] == result_hash[:date]) && (j['device'] == result_hash[:device])
+      if (j['date'] == result_hash[:date]) && (j['device'] == result_hash[:device]) && (j['report_file'] == result_hash[:report_file])
         same_test = true
         j.replace(result_hash)
       end
