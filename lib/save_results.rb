@@ -5,7 +5,7 @@ def save_results(root_path, device, case_count, start_time, fails_count, report_
       :date => Time.now.strftime('%d.%m.%Y'),
       :device => device,
       :case_count => case_count,
-      :start_time => Time.parse(start_time),
+      :start_time => start_time,
       :end_time => Time.now.strftime('%H:%M:%S'),
       :fails_count => fails_count,
       :report_file => report_file_path
