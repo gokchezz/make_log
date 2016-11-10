@@ -1,0 +1,5 @@
+<tr bgcolor="%color%">
+	<td align="right">%reference%</td>
+	<td></td>
+	<td align="left">%screenshot%</td>
+</tr>

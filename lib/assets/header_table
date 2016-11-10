@@ -1,0 +1,10 @@
+<h3>%header%</h3>
+    <table bgcolor="#FFFFFF" width="100%" style="border-bottom: 1px solid #F0F0F0; padding: 15px; color:#696969; font-size:10pt; border:0;" align="center">
+		<thead>
+			<tr>
+                <th width="49%" align="right">References</th>
+                <th width="2%"></th>
+                <th width="49%" align="left">Screenshots</th>
+			</tr>
+		</thead>
+		<tbody>
