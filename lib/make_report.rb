@@ -57,6 +57,20 @@ def make_img_row(control_id, id, reference, screenshot)
   edited_row
 end
 
+def no_error_row
+  @color = '#F5F9FC'
+  row = File.read("#{@path}/tr")
+  edited_row = ''
+  row.each_line do |line|
+    line = line.gsub('%color%', @color)
+    line = line.gsub('%reference%', '************* Test ended')
+    line = line.gsub('%screenshot%', 'with no error ***********')
+    edited_row += line
+  end
+  @row_count += 1
+  edited_row
+end
+
 def prepare_report(reference_path, screenshot_path, report_name, errors)
   @img_id = 0
   @row_count = 0
@@ -79,13 +93,17 @@ def prepare_report(reference_path, screenshot_path, report_name, errors)
     report_body += line
   end
   report_body << File.read("#{@path}/header_table").gsub('%header%', report_name)
-  errors.each do |error|
-    id = "img_#{@img_id}"
-    control_id = "ctr_#{@img_id}"
-    @img_id += 1
-    screenshot_file = Dir["#{screenshot_path}/#{error}_**.png"][0]
-    report_body << make_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
-    report_body << make_img_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
+  if errors.length == 0
+    report_body << no_error_row
+  else
+    errors.each do |error|
+      id = "img_#{@img_id}"
+      control_id = "ctr_#{@img_id}"
+      @img_id += 1
+      screenshot_file = Dir["#{screenshot_path}/#{error}_**.png"][0]
+      report_body << make_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
+      report_body << make_img_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
+    end
   end
   report_body << File.read("#{@path}/header_table_closure")
   report_body << File.read("#{@path}/html_closure")
