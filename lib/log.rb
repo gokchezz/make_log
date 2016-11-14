@@ -5,32 +5,35 @@ class Log
     @index = 0
     @passed_scenarios = []
     @project_name = project_name
-    @log = %Q[<html><head></head><body><table width="1000" align="center" border="0"><tr><td colspan="2" align="center">
-    <h2 style="text-align:center; font-family:verdana;">#{display_name} Test Result</h2></td></tr>]
     @display_name = display_name
   end
   def get_index
     @index
   end
   def append_failure(number)
-    @log << '<tr><td colspan="2">'
-    @log << '<h3 style="font-family:verdana; color:red;">'
-    @log << "Failure ##{number}"
-    @log << '</h3>'
-    @log << '</td></tr>'
+    report_row = ''
+    report_row << '<tr><td colspan="2">'
+    report_row << '<h3 style="font-family:verdana; color:red;">'
+    report_row << "Failure ##{number}"
+    report_row << '</h3>'
+    report_row << '</td></tr>'
+    report_row
   end
   def append_line(key, value)
-    @log << '<tr><td width="30%">'
-    @log << key
+    report_row = ''
+    report_row << '<tr><td width="30%">'
+    report_row << key
     if value == 'Passed'
-      @log << ' </td><td  style="color:green;">'
+      report_row << ' </td><td  style="color:green;">'
     else
-      @log << ':  </td><td width="70%">'
+      report_row << ':  </td><td width="70%">'
     end
-    @log << value
-    @log << '</td></tr>'
+    report_row << value
+    report_row << '</td></tr>'
+    report_row
   end
   def make_log(scenario, step_count, example_index, running_driver)
+    failure_log = ''
     @scenario = scenario.test_steps[0].source[1]
     feature = scenario.test_steps[0].source[0]
     if @scenario.keyword == 'Scenario Outline'
@@ -52,36 +55,38 @@ class Log
       running_driver.save_screenshot(screenshot_path)
     end
     @index += 1
-    append_failure(@index)
-    append_line('Feature name', feature.name)
-    append_line('Unable to', @scenario.name)
-    append_line('Failing step', failed_step)
-    append_line('Report html', %Q[<a href="http://192.168.2.173:8447/job/#{@project_name}/cucumber-html-reports/">Click here..</a>])
-    append_line('Rspec Error message', error_message)
+    failure_log << append_failure(@index)
+    failure_log << append_line('Feature name', feature.name)
+    failure_log << append_line('Unable to', @scenario.name)
+    failure_log << append_line('Failing step', failed_step)
+    failure_log << append_line('Report html', %Q[<a href="http://192.168.2.173:8447/job/#{@project_name}/cucumber-html-reports/">Click here..</a>])
+    failure_log << append_line('Rspec Error message', error_message)
     f = File.binread(screenshot_path)
     encripted_image = Base64.encode64(f).tr("\n", '')
-    append_line('Screenshot', %Q[<a href="data:image/png;base64,#{encripted_image}"><img height=120 src="data:image/png;base64,#{encripted_image}"></a>])
+    failure_log << append_line('Screenshot', %Q[<a href="data:image/png;base64,#{encripted_image}"><img height=120 src="data:image/png;base64,#{encripted_image}"></a>])
   end
   def append_success
-    @log << '<tr><td colspan="2">'
-    @log << '<h3 style="font-family:verdana; color:green;">'
-    @log << 'Passed Scenarios:'
-    @log << '</h3>'
-    @log << '</td></tr>'
+    report_row = ''
+    report_row << '<tr><td colspan="2">'
+    report_row << '<h3 style="font-family:verdana; color:green;">'
+    report_row << 'Passed Scenarios:'
+    report_row << '</h3>'
+    report_row << '</td></tr>'
+    report_row
   end
   def append_passed_scenario(scenario)
     ast_scenario = scenario.test_steps[0].source[1]
     @passed_scenarios << ast_scenario
   end
-  def finalize
+  def finalize(report_body)
     if @passed_scenarios.length != 0
-      append_success
+      report_body << append_success
       @passed_scenarios.each do |scenario|
-        append_line(scenario.name, 'Passed')
+        report_body << append_line(scenario.name, 'Passed')
       end
     end
-    @log << '</table></body></html>'
+    report_body << '</table></body></html>'
     date_stamp = "#{Time.now.strftime("%d%b")}"
-    File.open(File.expand_path("../#{@project_name}/#{date_stamp}_#{@display_name.tr(' ', '_')}_result.html"), 'w+') {|f| f.write("#{@log}") }
+    File.open(File.expand_path("../#{@project_name}/#{date_stamp}_#{@display_name.tr(' ', '_')}_result.html"), 'w+') {|f| f.write("#{report_body}") }
   end
 end
