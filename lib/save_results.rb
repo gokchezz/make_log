@@ -7,14 +7,14 @@ def create_results_json(root_path, result_hash)
   file.close
 end
 
-def save_results(root_path, device, case_count, start_time, fails_count, report_file_path)
+def save_results(root_path, device, case_count, start_time, fails, report_file_path)
   result_hash = {
       :date => Time.now.strftime('%d.%m.%Y'),
       :device => device,
       :case_count => case_count,
       :start_time => start_time,
       :end_time => Time.now.strftime('%H:%M:%S'),
-      :fails_count => fails_count,
+      :fails => fails,
       :report_file => report_file_path
   }
   if Dir["#{root_path}/results.json"].length == 0
@@ -36,14 +36,14 @@ def save_results(root_path, device, case_count, start_time, fails_count, report_
   end
 end
 
-def save_results_on_existing_file(root_path, device, case_count, start_time, fails_count, report_file_path)
+def save_results_on_existing_file(root_path, device, case_count, start_time, fails, report_file_path)
   result_hash = {
       :date => Time.now.strftime('%d.%m.%Y'),
       :device => device,
       :case_count => case_count,
       :start_time => start_time,
       :end_time => Time.now.strftime('%H:%M:%S'),
-      :fails_count => fails_count,
+      :fails => fails,
       :report_file => report_file_path
   }
   json = File.read("#{root_path}/results.json")

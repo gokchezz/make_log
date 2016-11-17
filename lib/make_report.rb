@@ -1,6 +1,7 @@
 require 'base64'
 require 'azure'
 require 'openssl'
+require 'date'
 
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
@@ -13,11 +14,17 @@ def img_object(id, encrypted_image)
   %Q[<img height=600 id="#{id}" style="display: none" src="data:image/png;base64,#{encrypted_image}"/>]
 end
 
-def make_row(control_id, id, reference, screenshot)
+def sign_object(encrypted_image)
+  %Q[<img height=15 src="data:image/png;base64,#{encrypted_image}"/>]
+end
+
+def make_row(control_id, id, reference, screenshot, sign)
   ref_file = File.binread(reference)
   encrypted_reference_image = Base64.encode64(ref_file).tr("\n", '')
   scr_file = File.binread(screenshot)
   encrypted_screenshot = Base64.encode64(scr_file).tr("\n", '')
+  sign_file = File.binread(sign)
+  encrypted_sign = Base64.encode64(sign_file).tr("\n", '')
   if @row_count % 2 == 0
     @color = '#F5F9FC'
   else
@@ -28,6 +35,7 @@ def make_row(control_id, id, reference, screenshot)
   row.each_line do |line|
     line = line.gsub('%color%', @color)
     line = line.gsub('%reference%', link_object(control_id, encrypted_reference_image))
+    line = line.gsub('%sign%', sign_object(encrypted_sign))
     line = line.gsub('%screenshot%', link_object(id, encrypted_screenshot))
     edited_row += line
   end
@@ -71,11 +79,12 @@ def no_error_row
   edited_row
 end
 
-def prepare_report(reference_path, screenshot_path, report_name, errors)
+def prepare_report(reference_path, screenshot_path, report_name, errors, result_path, device_name)
   @img_id = 0
   @row_count = 0
   report_body = ''
   @path = nil
+  previous_errors = get_errors_of_previous_day(result_path, device_name)
   dirs = File.absolute_path(__FILE__).split('/')
   i = 0
   (dirs.length-1).times do
@@ -100,8 +109,9 @@ def prepare_report(reference_path, screenshot_path, report_name, errors)
       id = "img_#{@img_id}"
       control_id = "ctr_#{@img_id}"
       @img_id += 1
+      sign = get_sign(error, previous_errors)
       screenshot_file = Dir["#{screenshot_path}/#{error}_**.png"][0]
-      report_body << make_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
+      report_body << make_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file, sign)
       report_body << make_img_row(control_id, id, "#{reference_path}/#{error}.png", screenshot_file)
     end
   end
@@ -118,6 +128,27 @@ def prepare_report(reference_path, screenshot_path, report_name, errors)
   save_file_to_azure(@path, "#{report_name}.html")
 
   File.delete("#{@path}/#{report_name}.html")
+end
+
+def get_errors_of_previous_day(result_path, device_name)
+  yesterday = Date.today - 1
+  results = []
+  if Dir["#{result_path}/results.json"].length != 0
+    json = File.read(path)
+    json_hash = JSON.parse(json)
+    json_hash.each do |j|
+      if (j['date'] == yesterday.strftime('%d.%m.%Y')) && (j['device'] == device_name)
+        results << j
+      end
+    end
+  end
+  results['fails']
+end
+
+def get_sign(error, previous_errors)
+  sign = "#{@path}/stop-sign.png"
+  sign = "#{@path}/unlemis.png" if !previous_errors.include? error
+  sign
 end
 
 def save_file_to_azure(file_path, file_to_upload)
