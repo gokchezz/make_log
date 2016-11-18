@@ -138,16 +138,17 @@ def get_errors_of_previous_day(result_path, device_name)
     json_hash = JSON.parse(json)
     json_hash.each do |j|
       if (j['date'] == yesterday.strftime('%d.%m.%Y')) && (j['device'] == device_name)
-        results << j
+        results << j['fails']
       end
     end
   end
-  results['fails']
+  results
 end
 
 def get_sign(error, previous_errors)
   sign = "#{@path}/stop-sign.png"
   sign = "#{@path}/unlemis.png" if !previous_errors.include? error
+  sign = "#{@path}/success-icon.png"
   sign
 end
 

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'make_log'
-  s.version     = '0.2.1'
+  s.version     = '0.2.2'
   s.date        = '2016-11-18'
   s.summary     = "Library for Dashboard and IDE tests"
   s.description = "This repository includes log.rb file which is used by Dashboard and IDE tests of Smartface"
