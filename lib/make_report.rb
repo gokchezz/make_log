@@ -134,7 +134,7 @@ def get_errors_of_previous_day(result_path, device_name)
   yesterday = Date.today - 1
   results = []
   if Dir["#{result_path}/results.json"].length != 0
-    json = File.read(path)
+    json = File.read("#{result_path}/results.json")
     json_hash = JSON.parse(json)
     json_hash.each do |j|
       if (j['date'] == yesterday.strftime('%d.%m.%Y')) && (j['device'] == device_name)
