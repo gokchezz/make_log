@@ -15,7 +15,7 @@ def img_object(id, encrypted_image)
 end
 
 def sign_object(encrypted_image)
-  %Q[<img height=15 src="data:image/png;base64,#{encrypted_image}"/>]
+  %Q[<img height=25 src="data:image/png;base64,#{encrypted_image}"/>]
 end
 
 def make_row(control_id, id, reference, screenshot, sign)
@@ -58,6 +58,7 @@ def make_img_row(control_id, id, reference, screenshot)
   row.each_line do |line|
     line = line.gsub('%color%', @color)
     line = line.gsub('%reference%', img_object(control_id, encrypted_reference_image))
+    line = line.gsub('%sign%', '')
     line = line.gsub('%screenshot%', img_object(id, encrypted_screenshot))
     edited_row += line
   end
@@ -125,12 +126,11 @@ def prepare_report(reference_path, screenshot_path, report_name, errors, result_
   out_file = File.new("#{@path}/#{report_name}.html", 'w')
   out_file.puts(report_body)
   out_file.close
-
   while true do
     break if Dir["#{@path}/#{report_name}.html"].length > 0
   end
-  save_file_to_azure(@path, "#{report_name}.html")
 
+  save_file_to_azure(@path, "#{report_name}.html")
   File.delete("#{@path}/#{report_name}.html")
 end
 
