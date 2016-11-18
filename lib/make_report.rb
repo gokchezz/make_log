@@ -69,9 +69,13 @@ def no_error_row
   @color = '#F5F9FC'
   row = File.read("#{@path}/tr")
   edited_row = ''
+  sign = "#{@path}/success-icon.png"
+  sign_file = File.binread(sign)
+  encrypted_sign = Base64.encode64(sign_file).tr("\n", '')
   row.each_line do |line|
     line = line.gsub('%color%', @color)
     line = line.gsub('%reference%', '************* Test ended')
+    line = line.gsub('%sign%', sign_object(encrypted_sign))
     line = line.gsub('%screenshot%', 'with no error ***********')
     edited_row += line
   end
@@ -148,7 +152,6 @@ end
 def get_sign(error, previous_errors)
   sign = "#{@path}/stop-sign.png"
   sign = "#{@path}/unlemis.png" if !previous_errors.include? error
-  sign = "#{@path}/success-icon.png"
   sign
 end
 
