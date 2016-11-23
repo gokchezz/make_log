@@ -146,6 +146,7 @@ def get_errors_of_previous_day(result_path, device_name)
       end
     end
   end
+  results = [] if results.nil?
   results
 end
 
