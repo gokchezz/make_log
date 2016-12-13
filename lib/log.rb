@@ -43,7 +43,7 @@ class Log
     else
       failed_step = @scenario.children[step_count].name
     end
-    error_message = scenario.exception.to_s
+    error_message = scenario.exception.to_s.gsub(/[<>]/, '-')
     timestamp = "#{Time.now.strftime('%d%b')}"
     screenshot_name = "#{@index+1}_#{timestamp}_#{@scenario.name.gsub(' ', '_')}.png"
     screenshot_path = File.expand_path("tmp/#{screenshot_name}")
